@@ -13,11 +13,11 @@ model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 app = Flask(__name__)
 
 # for entire response
-@app.route('/generate/entire', methods=['POST'])
-def generate_entire_text():
+@app.route('/generate_disposal', methods=['POST'])
+def generate_disposal():
     try:
         prompt=request.json.get('prompt')
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, generation_config = genai.types.GenerationConfig(temperature=0.1))
         return jsonify({'response': response.text})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -30,10 +30,11 @@ for chunk in response:
 
 def chat(message):
     chat_history = [
+        {"role": "system", "parts": "Hello"},
         {"role": "user", "parts": "Hello"},
-        {"role": "model", "parts": "Great to meet you. What would you like to know?"},
+        {"role": "model", "parts": "Hey Green Panther!\nWhat brings you here?"},
     ]
-    chat_session = model.start_chat(history=chat_history)
+    chat_session = model.start_chat(history = chat_history, temperature=0.7)
     response = chat_session.send_message(message)
     return response.text
 
@@ -71,18 +72,6 @@ def interpret_command_with_gpt(command):
     safety_settings = [
         {
             "category": "HARM_CATEGORY_HARASSMENT",
-            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            "category": "HARM_CATEGORY_HATE_SPEECH",
-            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            "threshold": "BLOCK_MEDIUM_AND_ABOVE"
-        },
-        {
-            "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
             "threshold": "BLOCK_MEDIUM_AND_ABOVE"
         },
     ]
