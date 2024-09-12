@@ -1,1 +1,1 @@
-# waste-wise
+# Waste Wise
