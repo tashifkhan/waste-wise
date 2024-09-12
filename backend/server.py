@@ -224,9 +224,10 @@ def generate_disposal():
 
 # chatbot
 def chat(message):
+    # Chat history setup
     chat_history = [
         {
-            "role": "system", 
+            "role": "system",
             "parts": '''
                 We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
                 Problem: Improper waste management is contributing to pollution and environmental degradation.
@@ -241,25 +242,42 @@ def chat(message):
                 We shall also have chatbot that will support you with anything relate to the environment.
                 We will be using image detection api for getting information regarding the images 
                 we will use api  to input the waste products that have been detected using the previous api to get information about what type/classification of waste it is and how to dispose of it also tell ways to recycle the item as well as reuse it we are also using an youtube api to get links of diy videos regarding reusing the items and how to make sure we us the item to make diy products
-        '''},
+            '''
+        },
         {
-            "role": "user", 
+            "role": "user",
             "parts": "Hello"
         },
         {
-            "role": "model", 
-            "parts": "Hey Green Panther!\nWhat brings you here?"
+            "role": "model",
+            "parts": "Hey Green Panther! What brings you here?"
         },
     ]
-    chat_session = model.start_chat(history = chat_history, temperature=0.7)
+    
+    # Create chat session using model API
+    chat_session = model.start_chat(history=chat_history, temperature=0.7)
+    
+    # Send the message
     response = chat_session.send_message(message)
+    
+    # Return the text response
     return response.text
 
+# Flask endpoint to handle chat requests
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
     message = request.form.get('message')
-    response = chat(message)
-    return jsonify({'response': response})
+    
+    # Check if the message is missing or empty
+    if not message:
+        return jsonify({"error": "Message is required"}), 400
+
+    # Call the chat function and return the response
+    try:
+        response = chat(message)
+        return jsonify({'response': response})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 # frontend code
 # async function sendMessage(message) {
