@@ -1,12 +1,11 @@
-const {nextui} = require('@nextui-org/theme');
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    "./src/**/*.{html,js}",
-    "./node_modules/@nextui-org/theme/dist/components/(table|checkbox|spacer).js"
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {},
   },
-  plugins: [nextui()],
+  plugins: [],
 }

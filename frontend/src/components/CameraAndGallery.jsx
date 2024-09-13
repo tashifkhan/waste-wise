@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 function CameraAndGallery() {
-  const [hasCameraAccess, setHasCameraAccess] = useState(false);
+  // const [hasCameraAccess, setHasCameraAccess] = useState(false);
   const [galleryImage, setGalleryImage] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const videoRef = useRef(null);
