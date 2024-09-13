@@ -322,11 +322,11 @@ def youtube_search():
             video_id = item['id']['videoId']
             video_url = f'https://www.youtube.com/watch?v={video_id}'
             video_links.append(video_url)
-            video_id_list.append(video_id)
+            video_id_links.append(video_id)
 
         return jsonify(
             {
-                "video_ids" : video_id_list,
+                "video_ids" : video_id_links,
                 "video_links" : video_links,
                 "error" : "none"
             }
