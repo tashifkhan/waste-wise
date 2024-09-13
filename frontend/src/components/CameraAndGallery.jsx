@@ -72,9 +72,16 @@ function CameraAndGallery() {
               autoPlay
               style={{ width: '100%', height: '700px' }}
             />
-            <button onClick={captureImage} style={{ display: 'block', margin: '10px 0' }}>
-              Capture Photo
-            </button>
+            <button 
+  onClick={captureImage} 
+  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
+>
+  Capture Photo
+</button>
+
+            {/* <Button color="success" endContent={<CameraIcon/>}>
+        Take a photo
+      </Button>     */}
             <canvas ref={canvasRef} style={{ display: 'none' }} />
             {capturedImage && (
               <div>
