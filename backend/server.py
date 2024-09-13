@@ -121,13 +121,6 @@ def generate_recycle():
         type = request.form.get('type')
         desc = request.form.get('desc')
 
-        if not name_item or not type or not desc:
-            return jsonify(
-                {
-                    "error": "Please provide all required fields: name_item, type, and desc"
-                }
-            ), 400
-
         prompt = f'''
             We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
             Problem: Improper waste management is contributing to pollution and environmental degradation.
@@ -147,6 +140,7 @@ def generate_recycle():
             Don't include results for different type of waste for example and give output for only the input that you will receive
             Inputs are name:{name_item} plate, type: {type} & discription: {desc}
             Give only the output JSON and no other information whether it be an explanation of the answer and don't forget to add a key of "error" and its value being "none" in the JSON output
+            Do describe the the recycling methods in atleast 2-3 lines.
         ''' 
         response = model.generate_content(
             prompt,
@@ -154,7 +148,7 @@ def generate_recycle():
         )
 
         # Parse the response into a JSON object
-        parsed_response = json.loads(response.text)
+        parsed_response = json.loads(response.text[8:-3])
 
         # Format the response as desired
         formatted_response = {
@@ -201,18 +195,20 @@ def generate_disposal():
             We are inputting the waste type and name of the waste item return only the disposal_method and tips ,don't return the waste type and item name as we already have that as input
             Don't include results for different type of waste for example and give output for only the input that you will receive
             Inputs are name:{name_item} plate, type: {type} & discription: {desc}
-            Give only the output JSON and no other information whether it be an explanation of the  answer and don't forget to add a key of "error" and its value being "none" in the JSON output
+            Give only the output JSON and no other information whether it be an explanation of the  answer and don't forget to add a key of "error" and its value being "none" in the JSON output.
+            Do describe the the disposal methods in atleast 2-3 lines.
         ''' 
         response = model.generate_content(prompt, generation_config = genai.types.GenerationConfig(temperature=0.1))
   
-        parsed_response = json.loads(response.text)
+        parsed_response = json.loads(response.text[8:-3])
 
         formatted_response = {
             "disposal_method": parsed_response["disposal_method"],
             "tips": parsed_response["tips"],
             "error": "none"
         }
-        return jsonify(response.text)
+
+        return jsonify(formatted_response)
     
     except Exception as e:
         return jsonify(
@@ -312,18 +308,18 @@ def chat_endpoint():
             }
         ), 500
 
-# frontend code
-# async function sendMessage(message) {
-#     const response = await fetch('http://localhost:5000/chat', {
-#         method: 'POST',
-#         headers: {
-#             'Content-Type': 'application/json'
-#         },
-#         body: JSON.stringify({ message: message })
-#     });
-#     const data = await response.json();
-#     console.log(data.response);
-# }
+''' frontend code
+async function sendMessage(message) {
+    const response = await fetch('http://localhost:5000/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message })
+    });
+    const data = await response.json();
+    console.log(data.response);
+'''
 
 @app.route('/youtube_search', methods=['POST'])
 def youtube_search():
