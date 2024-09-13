@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 import google.generativeai as genai
 import PIL.Image
-from werkzeug.utils import secure_filename
+import requests
 import json
 import os
 
@@ -95,7 +96,7 @@ def img_processing():
         formatted_response = {
             "name": parsed_response.get("name"),
             "desc": parsed_response.get("desc"),
-            "disposal": parsed_response.get("disposal"),
+            "type": parsed_response.get("type"),
             "error": "none"
         }
 
@@ -169,6 +170,7 @@ def generate_recycle():
         return jsonify({
             "recycling_method": "e-1",
             "tips": "e-1",
+            "diy_solutions": "e-1",
             "error": str(e)
         }), 500
     
@@ -291,6 +293,53 @@ def chat_endpoint():
 #     const data = await response.json();
 #     console.log(data.response);
 # }
+
+@app.route('/youtube_search', methods=['POST'])
+def youtube_search():
+    yt_api_key = os.getenv("YOUTUBE_API_KEY")
+    name_item=request.form.get('name_item')
+
+    search_query = f"DIY/ Best out of waste/ Recycling {name_item}"
+
+    search_url = 'https://www.googleapis.com/youtube/v3/search'
+
+    params = {
+        'part': 'snippet',
+        'q': search_query,
+        'type': 'video',
+        'maxResults': 12,  
+        'key': yt_api_key
+    }
+
+    response = requests.get(search_url, params=params)
+
+    if response.status_code == 200:
+        search_results = response.json()
+        video_links = []
+        video_id_links = []
+
+        for item in search_results['items']:
+            video_id = item['id']['videoId']
+            video_url = f'https://www.youtube.com/watch?v={video_id}'
+            video_links.append(video_url)
+            video_id_list.append(video_id)
+
+        return jsonify(
+            {
+                "video_ids" : video_id_list,
+                "video_links" : video_links,
+                "error" : "none"
+            }
+        )
+    
+    else:
+        return jsonify(
+            {
+                "video_ids" : "e-1",
+                "video_links" : "e-1",
+                "error" : f"Error fetching data: {response.status_code}"
+            }
+        )
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
