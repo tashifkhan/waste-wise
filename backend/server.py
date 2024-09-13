@@ -167,12 +167,14 @@ def generate_recycle():
         return jsonify(formatted_response)
     
     except Exception as e:
-        return jsonify({
-            "recycling_method": "e-1",
-            "tips": "e-1",
-            "diy_solutions": "e-1",
-            "error": str(e)
-        }), 500
+        return jsonify(
+            {
+                "recycling_method": "e-1",
+                "tips": "e-1",
+                "diy_solutions": "e-1",
+                "error": str(e)
+            }
+        ), 500
     
     
 @app.route('/generate_disposal', methods=['POST'])
@@ -213,11 +215,13 @@ def generate_disposal():
         return jsonify(response.text)
     
     except Exception as e:
-        return jsonify({
-            "disposal_method": "e-1",
-            "tips": "e-1",
-            "error": str(e)
-        }), 500
+        return jsonify(
+            {
+                "disposal_method": "e-1",
+                "tips": "e-1",
+                "error": str(e)
+            }
+        ), 500
     # ''' # Chunched 
     # response = model.generate_content("what is alpha", stream=True)
     # for chunk in response:
@@ -259,11 +263,24 @@ def chat(message):
     # Create chat session using model API
     chat_session = model.start_chat(history=chat_history, temperature=0.7)
     
-    # Send the message
+    # Send the message and get the response
     response = chat_session.send_message(message)
     
-    # Return the text response
-    return response.text
+    # Parse the response to extract JSON-like information
+    try:
+        parsed_response = json.loads(response.text)
+    except json.JSONDecodeError:
+        raise Exception("Failed to parse model response")
+
+    # Format the response into the desired structure
+    formatted_response = {
+        "recycling_method": parsed_response.get("recycling_method", []),
+        "tips": parsed_response.get("tips", []),
+        "diy_solutions": parsed_response.get("diy_solutions", []),
+        "error": "none"
+    }
+    
+    return formatted_response
 
 # Flask endpoint to handle chat requests
 @app.route('/chat', methods=['POST'])
@@ -272,14 +289,28 @@ def chat_endpoint():
     
     # Check if the message is missing or empty
     if not message:
-        return jsonify({"error": "Message is required"}), 400
+        return jsonify(
+            {
+                "recycling_method": "e-1",
+                "tips": "e-1",
+                "diy_solutions": "e-1",
+                "error": "Message is required"
+            }
+        ), 400
 
     # Call the chat function and return the response
     try:
-        response = chat(message)
-        return jsonify({'response': response})
+        formatted_response = chat(message)
+        return jsonify(formatted_response)
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify(
+            {
+                "recycling_method": "e-1",
+                "tips": "e-1",
+                "diy_solutions": "e-1",
+                "error": str(e)
+            }
+        ), 500
 
 # frontend code
 # async function sendMessage(message) {
