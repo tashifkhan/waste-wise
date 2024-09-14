@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+from io import BytesIO
 import google.generativeai as genai
 import PIL.Image
 import requests
@@ -17,7 +18,7 @@ app = Flask(__name__)
 
 @app.route('/img_processing', methods=['POST'])
 def img_processing():
-    UPLOAD_FOLDER = 'uploads'
+    UPLOAD_FOLDER = 'backend/uploads'
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'heic', 'heif'}
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -34,92 +35,99 @@ def img_processing():
             pass
 
     if 'file' not in request.files:
-        return jsonify(
-            {
-                "error": "No file part"
-            }
-        ), 400
+        return jsonify({
+            "name": "e-1",
+            "type": "e-1",
+            "desc": "e-1",
+            "error": "No file part"
+        }), 400
     
     file = request.files['file']
 
     if file.filename == '':
-        return jsonify(
-            {
-                "error": "No selected file"
-            }
-        ), 400
+        return jsonify({
+            "name": "e-1",
+            "type": "e-1",
+            "desc": "e-1",
+            "error": "No selected file"
+        }), 400
     
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(file_path)
         
         try:
-            img = PIL.Image.open(file_path)
-            img.verify()  
+            # Read file into memory
+            file_content = file.read()
+            
+            # Open image using PIL
+            img = PIL.Image.open(BytesIO(file_content))
+
+            # Convert image to RGB if it's not already
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+
+            prompt = '''
+                Identify the objects in the image and provide the appropriate disposal techniques. 
+                Return the response in a JSON format where object's name is mapped to the 'name' key, 
+                the 'desc' key gives an accurate and environmentally relevant description of the object 
+                as well as the catagorise the image in the key 'type'. 
+                Categorize the waste (object in the image) into one of the following categories. 
+                household garbage, paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, batteries, and trash
+                Ensure the description and disposal method are accurate and environmentally responsible.
+                ensure that the json is formatted as follows:
+                {
+                    "name": #name of the object / objects in the image (if multiple objects then just format the string as name1, name2, etc),
+                    "type": #type of the object / objects in the image (if it has multiple objects then the string should be formatted as object1 - type1, object2 - type2, etc),
+                    "desc": #description of the object / objects in the image (if it has multiple objects then the string should be formatted as object1 - type1, object2 - type2, etc),
+                }
+            '''
+
+            # Generate content
+            response = model.generate_content([prompt, img])
+            response.resolve()
+
+            parsed_response = json.loads(response.text[8:-3])
+
+            formatted_response = {
+                "name": parsed_response.get("name"),
+                "desc": parsed_response.get("desc"),
+                "type": parsed_response.get("type"),
+                "error": "none"
+            }
+
+            return jsonify(
+                formatted_response
+            )
 
         except Exception as e:
-            delete_uploaded_file(file_path)
-            return jsonify(
-                {
-                    "error": "Invalid image file"
-                }
-            ), 400
-    
-    else:
-        return jsonify(
-            {
-                "error": "Invalid file type"
-            }
-        ), 400
-
-    prompt = '''
-        Identify the objects in the image and provide the appropriate disposal techniques. 
-        Return the response in a JSON format where object's name is mapped to the 'name' key, 
-        the 'desc' key gives an accurate and environmentally relevant description of the object 
-        as well as the condition it is in, and the 'disposal' key gives disposal methods 
-        (how to effectively dispose of the object/objects in the image). 
-        Categorize the waste (object in the image) into one of the following categories. 
-        Ensure the description and disposal method are accurate and environmentally responsible.
-    '''
-
-    try:
-        # Use only the prompt, as image handling may differ in the API
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.types.GenerationConfig(temperature=0.4)
-        )
-        delete_uploaded_file(file_path)
-
-        parsed_response = json.loads(response.text)
-
-        formatted_response = {
-            "name": parsed_response.get("name"),
-            "desc": parsed_response.get("desc"),
-            "type": parsed_response.get("type"),
-            "error": "none"
-        }
-
-        return jsonify(formatted_response)
-    
-    except Exception as e:
-        return jsonify(
-            {
+            return jsonify({
                 "name": "e-1",
                 "type": "e-1",
                 "desc": "e-1",
-                "error": str(e)
-            }
-        ), 500
-
+                "error": f"Error processing image: {str(e)}"
+            }), 400
+        
+        finally:
+            # Clean up: delete the file if it was saved
+            delete_uploaded_file(file_path)
+    
+    else:
+        return jsonify({
+            "name": "e-1",
+            "type": "e-1",
+            "desc": "e-1",
+            "error": "Invalid file type"
+        }), 400
+       
 
 @app.route('/generate_recycle', methods=['POST'])
 def generate_recycle():
 
     try:
-        name_item=request.form.get('name_item')
-        type = request.form.get('type')
-        desc = request.form.get('desc')
+        name_item=request.json.get('name_item')
+        type = request.json.get('type')
+        desc = request.json.get('desc')
 
         prompt = f'''
             We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
@@ -142,6 +150,18 @@ def generate_recycle():
             Give only the output JSON and no other information whether it be an explanation of the answer and don't forget to add a key of "error" and its value being "none" in the JSON output
             Do describe the the recycling methods in atleast 2-3 lines.
         ''' 
+
+        format_specification = '''
+            ensure that the json is formatted as follows:
+            {
+                "recycling_method": # list of strings elaborating the recycling method for the waste item  #["str1", "str2", "str3", ...],
+                "tips": # list of strings elaborating the tips for recycling of the waste item  #["str1", "str2", "str3", ...],
+                "diy_solutions": # list of strings elaborating the DIY solutions for the waste item  #["str1", "str2", "str3", ...]
+            }
+        '''
+
+        prompt = f"{prompt}\n{format_specification}"
+
         response = model.generate_content(
             prompt,
             generation_config = genai.types.GenerationConfig(temperature=0.1)
@@ -163,9 +183,9 @@ def generate_recycle():
     except Exception as e:
         return jsonify(
             {
-                "recycling_method": "e-1",
-                "tips": "e-1",
-                "diy_solutions": "e-1",
+                "recycling_method": ["e-1"],
+                "tips": ["e-1"],
+                "diy_solutions": ["e-1"],
                 "error": str(e)
             }
         ), 500
@@ -174,9 +194,9 @@ def generate_recycle():
 @app.route('/generate_disposal', methods=['POST'])
 def generate_disposal():
     try:
-        name_item=request.form.get('name_item')
-        type = request.form.get('type')
-        desc = request.form.get('desc')
+        name_item=request.json.get('name_item')
+        type = request.json.get('type')
+        desc = request.json.get('desc')
         prompt = f'''
             We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
             Problem: Improper waste management is contributing to pollution and environmental degradation.
@@ -198,7 +218,22 @@ def generate_disposal():
             Give only the output JSON and no other information whether it be an explanation of the  answer and don't forget to add a key of "error" and its value being "none" in the JSON output.
             Do describe the the disposal methods in atleast 2-3 lines.
         ''' 
-        response = model.generate_content(prompt, generation_config = genai.types.GenerationConfig(temperature=0.1))
+
+        format_specification = '''
+            ensure that the json is formatted as follows:
+            {
+                "disposal_method": # list of strings elaborating the disposal method for the waste item  #["str1", "str2", "str3", ...],
+                "tips": # list of strings elaborating the tips for disposal of the waste item  #["str1", "str2", "str3", ...],
+            }
+        '''
+
+        prompt = f"{prompt}\n{format_specification}"
+
+        response = model.generate_content(
+            prompt, 
+            generation_config = 
+                genai.types.GenerationConfig(temperature=0.1)
+        )
   
         parsed_response = json.loads(response.text[8:-3])
 
@@ -213,8 +248,8 @@ def generate_disposal():
     except Exception as e:
         return jsonify(
             {
-                "disposal_method": "e-1",
-                "tips": "e-1",
+                "disposal_method": ["e-1"],
+                "tips": ["e-1"],
                 "error": str(e)
             }
         ), 500
@@ -276,50 +311,51 @@ def chat(message):
         "error": "none"
     }
     
-    return formatted_response
+    return jsonify(
+            formatted_response
+        )
 
 # Flask endpoint to handle chat requests
-@app.route('/chat', methods=['POST'])
-def chat_endpoint():
-    message = request.form.get('message')
+# @app.route('/chat', methods=['POST'])
+# def chat_endpoint():
+#     message = request.form.get('message')
     
-    # Check if the message is missing or empty
-    if not message:
-        return jsonify(
-            {
-                "recycling_method": "e-1",
-                "tips": "e-1",
-                "diy_solutions": "e-1",
-                "error": "Message is required"
-            }
-        ), 400
+#     # Check if the message is missing or empty
+#     if not message:
+#         return jsonify(
+#             {
+#                 "responce": "e-1",
+#                 "error": "Message is required"
+#             }
+#         ), 400
 
-    # Call the chat function and return the response
-    try:
-        formatted_response = chat(message)
-        return jsonify(formatted_response)
-    except Exception as e:
-        return jsonify(
-            {
-                "recycling_method": "e-1",
-                "tips": "e-1",
-                "diy_solutions": "e-1",
-                "error": str(e)
-            }
-        ), 500
+#     # Call the chat function and return the response
+#     try:
+#         formatted_response = chat(message)
+#         return jsonify(formatted_response)
+    
+#     except Exception as e:
+#         return jsonify(
+#             {
+#                 "recycling_method": ["e-1"],
+#                 "tips": ["e-1"],
+#                 "diy_solutions": ["e-1"],
+#                 "error": str(e)
+#             }
+#         ), 500
 
-''' frontend code
-async function sendMessage(message) {
-    const response = await fetch('http://localhost:5000/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: message })
-    });
-    const data = await response.json();
-    console.log(data.response);
-'''
+# ''' frontend code
+# async function sendMessage(message) {
+#     const response = await fetch('http://localhost:5000/chat', {
+#         method: 'POST',
+#         headers: {
+#             'Content-Type': 'application/json'
+#         },
+#         body: JSON.stringify({ message: message })
+#     });
+#     const data = await response.json();
+#     console.log(data.response);
+# '''
 
 @app.route('/youtube_search', methods=['POST'])
 def youtube_search():
