@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function CameraAndGallery() {
   const [hasCameraAccess, setHasCameraAccess] = useState(false);
@@ -7,6 +8,7 @@ function CameraAndGallery() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate(); // React Router navigation
 
   useEffect(() => {
     const getCameraStream = async () => {
@@ -42,6 +44,9 @@ function CameraAndGallery() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setGalleryImage(e.target.result);
+
+        // Redirect to image display page with selected image from gallery
+        navigate('/display-image', { state: { capturedImage: e.target.result } });
       };
       reader.readAsDataURL(file);
     }
@@ -53,7 +58,11 @@ function CameraAndGallery() {
       canvasRef.current.width = videoRef.current.videoWidth;
       canvasRef.current.height = videoRef.current.videoHeight;
       context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-      setCapturedImage(canvasRef.current.toDataURL('image/png'));
+      const imageData = canvasRef.current.toDataURL('image/png');
+      setCapturedImage(imageData);
+
+      // Redirect to image display page with captured image
+      navigate('/display-image', { state: { capturedImage: imageData } });
     } else {
       console.error('Video or canvas reference is missing');
     }
@@ -67,25 +76,15 @@ function CameraAndGallery() {
         <video
           ref={videoRef}
           autoPlay
-          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px',    border: '5px solid white', }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px', border: '5px solid white' }}
         />
         <canvas ref={canvasRef} style={{ display: 'none' }} />
-        {capturedImage && (
-          <div style={{ marginTop: '20px', width: '100%' }}>
-            <h3 style={{ color: 'white', textAlign: 'center' }}>Captured Image</h3>
-            <img
-              src={capturedImage}
-              alt="Captured from camera"
-              style={{ width: '100%', height: 'auto' }}
-            />
-          </div>
-        )}
       </div>
 
       {/* Capture Photo Button */}
       <button
         onClick={captureImage}
-        className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold  px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
+        className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
         style={{ marginBottom: '20px', fontSize: '1.2rem' }}
       >
         Capture Photo
@@ -93,27 +92,27 @@ function CameraAndGallery() {
 
       {/* Gallery Section */}
       <div style={{ width: '100%', textAlign: 'center' }}>
-      <h2 className='font-bold text-4xl text-white drop-shadow-md' style={{ color: 'white', fontSize: '1.7rem', marginBottom: '3px' }}>
-  Upload from Gallery
-</h2>
+        <h2 className='font-bold text-4xl text-white drop-shadow-md' style={{ color: 'white', fontSize: '1.7rem', marginBottom: '3px' }}>
+          Upload from Gallery
+        </h2>
 
-<div style={{ textAlign: 'center' }}>
-  <input
-    type="file"
-    accept="image/*"
-    ref={fileInputRef}
-    onChange={handleFileChange}
-    id="fileInput"
-    style={{ display: 'none' }} // Hide the default file input
-  />
-  <label
-    htmlFor="fileInput"
-    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded cursor-pointer"
-    style={{ fontSize: '1.2rem', display: 'inline-block' }}
-  >
-    Gallery
-  </label>
-</div>
+        <div style={{ textAlign: 'center' }}>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            id="fileInput"
+            style={{ display: 'none' }}
+          />
+          <label
+            htmlFor="fileInput"
+            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded cursor-pointer"
+            style={{ fontSize: '1.2rem', display: 'inline-block' }}
+          >
+            Gallery
+          </label>
+        </div>
 
         {galleryImage && (
           <img
