@@ -168,17 +168,21 @@ def generate_recycle():
         )
 
         # Parse the response into a JSON object
+        print(response.text[8:-3])
+
         parsed_response = json.loads(response.text[8:-3])
 
-        # Format the response as desired
-        formatted_response = {
-            "recycling_method": parsed_response["recycling_method"],
-            "tips": parsed_response["tips"],
-            "diy_solutions": parsed_response["diy_solutions"],
-            "error": "none"
-        }
+        return jsonify(parsed_response)
 
-        return jsonify(formatted_response)
+        # # Format the response as desired
+        # formatted_response = {
+        #     "recycling_method": parsed_response["recycling_method"],
+        #     "tips": parsed_response["tips"],
+        #     "diy_solutions": parsed_response["diy_solutions"],
+        #     "error": "none"
+        # }
+
+        # return jsonify(formatted_response)
     
     except Exception as e:
         return jsonify(
@@ -234,16 +238,20 @@ def generate_disposal():
             generation_config = 
                 genai.types.GenerationConfig(temperature=0.1)
         )
+
+        print(response.text[8:-3])
   
         parsed_response = json.loads(response.text[8:-3])
 
-        formatted_response = {
-            "disposal_method": parsed_response["disposal_method"],
-            "tips": parsed_response["tips"],
-            "error": "none"
-        }
+        return jsonify(parsed_response)
 
-        return jsonify(formatted_response)
+        # formatted_response = {
+        #     "disposal_method": parsed_response["disposal_method"],
+        #     "tips": parsed_response["tips"],
+        #     "error": "none"
+        # }
+
+        # return jsonify(formatted_response)
     
     except Exception as e:
         return jsonify(
@@ -317,51 +325,51 @@ def chat(message):
 
 # doesn't work suppor chat down
 # Flask endpoint to handle chat requests
-# @app.route('/chat', methods=['POST'])
-# def chat_endpoint():
-#     message = request.form.get('message')
+@app.route('/chat', methods=['POST'])
+def chat_endpoint():
+    message = request.form.get('message')
     
-#     # Check if the message is missing or empty
-#     if not message:
-#         return jsonify(
-#             {
-#                 "responce": "e-1",
-#                 "error": "Message is required"
-#             }
-#         ), 400
+    # Check if the message is missing or empty
+    if not message:
+        return jsonify(
+            {
+                "responce": "e-1",
+                "error": "Message is required"
+            }
+        ), 400
 
-#     # Call the chat function and return the response
-#     try:
-#         formatted_response = chat(message)
-#         return jsonify(formatted_response)
+    # Call the chat function and return the response
+    try:
+        formatted_response = chat(message)
+        return jsonify(formatted_response)
     
-#     except Exception as e:
-#         return jsonify(
-#             {
-#                 "recycling_method": ["e-1"],
-#                 "tips": ["e-1"],
-#                 "diy_solutions": ["e-1"],
-#                 "error": str(e)
-#             }
-#         ), 500
+    except Exception as e:
+        return jsonify(
+            {
+                "recycling_method": ["e-1"],
+                "tips": ["e-1"],
+                "diy_solutions": ["e-1"],
+                "error": str(e)
+            }
+        ), 500
 
-# ''' frontend code
-# async function sendMessage(message) {
-#     const response = await fetch('http://localhost:5000/chat', {
-#         method: 'POST',
-#         headers: {
-#             'Content-Type': 'application/json'
-#         },
-#         body: JSON.stringify({ message: message })
-#     });
-#     const data = await response.json();
-#     console.log(data.response);
-# '''
+''' frontend code
+async function sendMessage(message) {
+    const response = await fetch('http://localhost:5000/chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: message })
+    });
+    const data = await response.json();
+    console.log(data.response);
+'''
 
 @app.route('/youtube_search', methods=['POST'])
 def youtube_search():
     yt_api_key = os.getenv("YOUTUBE_API_KEY")
-    name_item=request.form.get('name_item')
+    name_item=request.json.get('name_item')
 
     search_query = f"DIY/ Best out of waste/ Recycling {name_item}"
 
