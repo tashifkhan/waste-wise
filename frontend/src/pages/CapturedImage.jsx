@@ -6,8 +6,8 @@ function CapturedImage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { capturedImage } = location.state || {};
-  const [processingResult, setProcessingResult] = useState(null); // To store backend response
-  const [loading, setLoading] = useState(false); // To show loading state
+  const [processingResult, setProcessingResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   if (!capturedImage) {
     return <h2>No image captured. Go back to the camera.</h2>;
@@ -17,22 +17,28 @@ function CapturedImage() {
     setLoading(true);
     const formData = new FormData();
 
-    // Convert the captured image (Blob or File) to a file and append to FormData
-    const response = await fetch(capturedImage);
-    const blob = await response.blob();
-    const file = new File([blob], 'captured-image.jpg', { type: 'image/jpeg' });
-
-    formData.append('file', file);
-
     try {
-      const res = await fetch('http://127.0.0.1:5000', {
+      console.log('Fetching image from:', capturedImage);
+      const response = await fetch(capturedImage);
+      const blob = await response.blob();
+      console.log('Fetched blob:', blob);
+
+      const file = new File([blob], 'captured-image.png', { type: 'image/png' });
+      console.log('Created file:', file);
+
+      formData.append('file', file);
+
+      const res = await fetch('http://127.0.0.1:5000/img_processing', {
         method: 'POST',
         body: formData,
       });
 
+      console.log('Response status:', res.status);
+      console.log('Response text:', await res.text());
+
       if (res.ok) {
         const result = await res.json();
-        setProcessingResult(result); // Store the response from the backend
+        setProcessingResult(result);
       } else {
         console.error('Error processing image:', res.statusText);
         setProcessingResult({ error: 'Failed to process image' });
@@ -47,7 +53,6 @@ function CapturedImage() {
 
   return (
     <div style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}>
-      {/* Video Background */}
       <video
         autoPlay
         loop
@@ -59,14 +64,13 @@ function CapturedImage() {
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          zIndex: -1, // Ensure the video stays behind the content
+          zIndex: -1,
         }}
       >
         <source src={BGVideo} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
-      {/* Captured Image and Button */}
       <div
         style={{
           display: 'flex',
@@ -89,11 +93,10 @@ function CapturedImage() {
             width: '45%',
             height: '70%',
             borderRadius: '10px',
-            border: '10px solid white', // Bold white border
-            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)', // Optional shadow for extra effect
+            border: '10px solid white',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
           }}
         />
-        {/* Display Loading or Result */}
         {loading ? (
           <p style={{ color: 'white', marginTop: '20px' }}>Processing image...</p>
         ) : (
@@ -111,7 +114,6 @@ function CapturedImage() {
             </div>
           )
         )}
-        {/* Confirm Button */}
         <button
           onClick={handleConfirmClick}
           className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
@@ -119,7 +121,6 @@ function CapturedImage() {
         >
           Confirm
         </button>
-        {/* Go Back Button */}
         <button
           onClick={() => navigate('/CameraPage')}
           className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
