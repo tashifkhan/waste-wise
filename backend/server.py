@@ -90,6 +90,7 @@ def img_processing():
             response.resolve()
 
             parsed_response = json.loads(response.text[8:-3])
+            print(response.text[8:-3])
 
             formatted_response = {
                 "name": parsed_response.get("name"),
