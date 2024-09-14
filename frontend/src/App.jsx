@@ -1,14 +1,10 @@
-import CameraAndGallery from "./components/CameraAndGallery"
-import CardsInfinite from "./components/CardsInfinite"
-import SubmitButton from "./components/SubmitButton"
-
+import Landing from "./pages/Landing"
 
 function App() {
 
-
   return (
  <div>
-<CardsInfinite/>
+<Landing/>
  </div>
   )
 }

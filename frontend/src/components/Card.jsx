@@ -14,7 +14,7 @@ export default function CharacterCard({ character }) {
         background: "black",
         color: "white",
         margin: "20px",          // Add margin to create space between cards
-        borderRadius: "10px",
+        borderRadius: "30px",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
