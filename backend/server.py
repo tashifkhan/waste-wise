@@ -315,6 +315,7 @@ def chat(message):
             formatted_response
         )
 
+# doesn't work suppor chat down
 # Flask endpoint to handle chat requests
 # @app.route('/chat', methods=['POST'])
 # def chat_endpoint():
