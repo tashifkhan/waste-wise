@@ -36,7 +36,7 @@ function CapturedImage() {
         const result = await res.json();
         setProcessingResult(result);
       } else {
-        console.error('Error prAIzaSyCrjGZ_vPFKBacneN6PsKxiriXquXjn0iIocessing image:', res.statusText);
+        console.error('Error processing image:', res.statusText);
         setProcessingResult({ error: 'Failed to process image' });
       }
     } catch (error) {
