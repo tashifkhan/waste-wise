@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
+from flask_cors import CORS
 from dotenv import load_dotenv
 from io import BytesIO
 import google.generativeai as genai
@@ -15,6 +16,7 @@ genai.configure(api_key=api_key)
 model = genai.GenerativeModel(model_name="gemini-1.5-flash")
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/img_processing', methods=['POST'])
 def img_processing():

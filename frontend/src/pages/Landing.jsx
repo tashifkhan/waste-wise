@@ -1,8 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';  // Import useNavigate for navigation
 import InfiniteLandingPage from '../components/InfiniteLandingPage';
 import LandingPageVid2 from '../Videos/LandingPageVid2.mp4';
 
 const Landing = () => {
+  const navigate = useNavigate();  // Initialize the navigate function
+
+  const handleAddImageClick = () => {
+    navigate('/CameraPage');  // Redirect to the Capture Image page
+  };
+
   return (
     <div className="relative h-screen overflow-hidden">
       {/* Video Background */}
@@ -25,13 +32,16 @@ const Landing = () => {
         <h1 className="text-5xl md:text-7xl font-bold">Our Heroes</h1>
 
         {/* Leaderboard Component with scrolling/overflow */}
-        <div className=" w-full  h-[70vh] overflow-auto">
+        <div className="w-full h-[70vh] overflow-auto">
           <InfiniteLandingPage />
         </div>
 
         {/* Green Add Button */}
-        <button className="absolute bottom-5 left-auto bg-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-600">
-          Add Image of your waste 
+        <button
+          className="absolute bottom-5 left-auto bg-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-600"
+          onClick={handleAddImageClick}  // Add onClick event to redirect
+        >
+          Add Image of your waste
         </button>
       </div>
     </div>
