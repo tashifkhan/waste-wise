@@ -44,7 +44,7 @@ function CardsInfinite() {
         alignItems: "center",
       }}
     >
-      <h1>Rick and Morty characters!</h1>
+      {/* <h1>Rick and Morty characters!</h1> */}
       <InfiniteScroll
         dataLength={characters.length} 
         next={fetchData}

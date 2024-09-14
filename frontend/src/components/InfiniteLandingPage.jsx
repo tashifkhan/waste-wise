@@ -1,72 +1,65 @@
-import React from "react";
-import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, getKeyValue, Spinner, Button} from "@nextui-org/react";
-import {useAsyncList} from "@react-stately/data";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import InfiniteScroll from "react-infinite-scroll-component";
+import CharacterCard from "./LandCard"; // Make sure the path is correct
 
-export default function InfiniteLandingPage() {
-  const [page, setPage] = React.useState(1);
-  const [isLoading, setIsLoading] = React.useState(true);
+function InfiniteLandingPage() {
+  const [characters, setCharacters] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
 
-  let list = useAsyncList({
-    async load({signal, cursor}) {
-      if (cursor) {
-        setPage((prev) => prev + 1);
-      }
+  const fetchData = async () => {
+    if (page > totalPages) {
+      setHasMore(false);
+      return;
+    }
 
-      // If no cursor is available, then we're loading the first page.
-      // Otherwise, the cursor is the next URL to load, as returned from the previous page.
-      const res = await fetch(cursor || "https://swapi.py4e.com/api/people/?search=", {signal});  
-      //fetch kr raha hai is link se  
-      let json = await res.json();   
+    // Waiting for 1 second before fetching data to show loading spinner
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      if (!cursor) {
-        setIsLoading(false);
-      }
+    const res = await axios.get(
+      `https://rickandmortyapi.com/api/character?page=${page}`
+    );
+    setCharacters((prevCharacters) => [...prevCharacters, ...res.data.results]);
+    setTotalPages(res.data.info.pages);
+    setPage((prevPage) => prevPage + 1);
+  };
 
-      return {
-        items: json.results,   // current data jo milega 
-        cursor: json.next,     // url for the next data jo ki fetch krna hai 
-      };
-    },
-  });
-
-  const hasMore = page < 9;
+  useEffect(() => {
+    fetchData();
+  }, []); 
 
   return (
-    <Table
-      isHeaderSticky
-      aria-label="Example table with client side sorting"
-      bottomContent={
-        hasMore && !isLoading ? (
-          <div className="flex w-full justify-center">
-            <Button isDisabled={list.isLoading} variant="flat" onPress={list.loadMore}>
-              {list.isLoading && <Spinner color="white" size="sm" />}
-              Load More
-            </Button>
-          </div>
-        ) : null
-      }
-      classNames={{
-        base: "max-h-[520px] overflow-scroll",
-        table: "min-h-[420px]",
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        width: "100%",
+        minHeight: "100vh", // Ensure it takes full height of the viewport
+        padding: "20px",
       }}
     >
-      <TableHeader>
-        <TableColumn key="name">Name</TableColumn>
-        <TableColumn key="height">Height</TableColumn>
-        <TableColumn key="mass">Mass</TableColumn>
-        <TableColumn key="birth_year">Birth year</TableColumn>
-      </TableHeader>
-      <TableBody
-        isLoading={isLoading}
-        items={list.items}
-        loadingContent={<Spinner label="Loading..." />}
+
+      <InfiniteScroll
+        dataLength={characters.length} 
+        next={fetchData}
+        hasMore={hasMore}
+        loader={<h4>Loading...</h4>}
+        endMessage={
+          <p>
+            <b>Yay! You have seen it all</b>
+          </p>
+        }
       >
-        {(item) => (
-          <TableRow key={item.name}>
-            {(columnKey) => <TableCell>{getKeyValue(item, columnKey)}</TableCell>}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        {/* Map over characters array and return JSX */}
+        {characters.map((character, index) => (
+          <CharacterCard key={index} character={character} />
+        ))}
+      </InfiniteScroll>
+    </div>
   );
 }
+
+export default InfiniteLandingPage;
