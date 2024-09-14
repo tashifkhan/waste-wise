@@ -1,38 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { CircularProgress } from '@mui/material'; // Material UI spinner
 
-const Banner = ({name,type,desc}) => {
-  const [waste, setWaste] = useState(''); 
-  const [type, setType] = useState('');
-  const [error, setError] = useState(''); 
+const Banner = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Retrieve the passed state from the previous page (name, type, and desc)
+  const { name, type, desc } = location.state || {};
+
   const [recycleData, setRecycleData] = useState(null);
+  const [youtubeVideos, setYoutubeVideos] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchWasteData = async () => {
-      try {
-        const response = await axios.post('http://localhost:5000/img_processing', {
-          // Pass necessary data here if required for the image processing
-        });
-
-        // Assuming the API returns the following data structure
-        setWaste(response.data.name); // Setting waste name
-        setType(response.data.type); // Setting waste type
-        setError(response.data.error || ''); // Handling any error messages from the API
-      } catch (error) {
-        setError('Failed to fetch data.'); // Handling request errors
-      }
-    };
-
-    fetchWasteData(); 
-  }, []);
+    if (!name || !type) {
+      setError('Missing necessary information for the request.');
+    }
+  }, [name, type]);
 
   const handleRecycle = async () => {
+    setLoading(true); // Start loading state
+
     try {
       // First API Call: Generate Recycling Methods
       const recycleResponse = await axios.post('http://localhost:5000/generate_recycle', {
-        name_item: name || waste, // Use either the prop or fetched waste name
-        type: type || wasteType, // Use either the prop or fetched waste type
-        desc: desc || 'No description provided', // Pass description or a fallback
+        name_item: name,
+        type: type,
+        desc: desc || 'No description provided',
       });
 
       setRecycleData(recycleResponse.data); // Set recycling data
@@ -40,7 +37,7 @@ const Banner = ({name,type,desc}) => {
 
       // Second API Call: Fetch YouTube videos
       const youtubeResponse = await axios.post('http://localhost:5000/youtube_search', {
-        name_item: name || waste, // Use waste name to search for DIY videos
+        name_item: name, // Use waste name to search for DIY videos
       });
 
       if (youtubeResponse.data.error === "none") {
@@ -61,37 +58,48 @@ const Banner = ({name,type,desc}) => {
         });
       }
     } catch (error) {
+      console.error(error);
       setError('Failed to process recycling or fetch YouTube videos.'); // Handle request errors
+    } finally {
+      setLoading(false); // End loading state
     }
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen w-full bg-gradient-to-b from-blue-300 to-blue-500 p-6">
+    <div className="flex flex-col justify-center items-center min-h-screen w-full bg-gradient-to-br from-blue-200 to-blue-600 p-8">
       {/* Top Section: Waste Information */}
-      <div className="text-center text-green-800 font-bold">
-        <p className="text-2xl mb-2">WASTE</p>
-        <p className="text-4xl mb-2 text-white">
-          {name || 'Loading...'} {/* Display fetched waste or loading state */}
+      <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+        <p className="text-xl font-semibold text-gray-800">WASTE</p>
+        <p className="text-2xl font-bold text-blue-800 mb-2">
+          {name || 'Loading...'}
         </p>
-        <p className="text-xl mb-4">TYPE</p>
-        <p className="text-3xl mb-6 text-white">
-          {type || 'Loading...'} {/* Display fetched type or loading state */}
+        <p className="text-lg font-semibold text-gray-800">TYPE</p>
+        <p className="text-2xl font-bold text-blue-800 mb-6">
+          {type || 'Loading...'}
         </p>
       </div>
 
       {/* Button Section */}
-      <div className="flex justify-center space-x-6 mb-6">
-        <button className="bg-green-600 text-white px-6 py-3 rounded-full shadow hover:bg-green-700"
-        onClick={handleDispose}>
-          DISPOSE
-        </button>
-        <button className="bg-green-600 text-white px-6 py-3 rounded-full shadow hover:bg-green-700"
-        onClick={handleRecycle}>
+      <div className="flex justify-center space-x-4 mt-6">
+        <button
+          className="bg-green-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-green-700 transition duration-300"
+          onClick={handleRecycle}
+        >
           RECYCLE
+        </button>
+        <button
+          className="bg-red-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-red-700 transition duration-300"
+        >
+          DISPOSE
         </button>
       </div>
 
-      {/* Error Display */}
+      {/* Loading and Error Display */}
+      {loading && (
+        <div className="flex items-center justify-center mt-6">
+          <CircularProgress color="secondary" />
+        </div>
+      )}
       {error && <p className="text-red-500 text-center mt-4">{error}</p>}
     </div>
   );
