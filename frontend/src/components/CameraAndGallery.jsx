@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 function CameraAndGallery() {
-  // const [hasCameraAccess, setHasCameraAccess] = useState(false);
-  const [galleryImage, setGalleryImage] = useState(null);   
+  const [hasCameraAccess, setHasCameraAccess] = useState(false);
+  const [galleryImage, setGalleryImage] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -31,9 +31,7 @@ function CameraAndGallery() {
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject;
         const tracks = stream.getTracks();
-        tracks.forEach((track) => {
-          track.stop();
-        });
+        tracks.forEach((track) => track.stop());
       }
     };
   }, []);
@@ -62,57 +60,66 @@ function CameraAndGallery() {
   };
 
   return (
-    <div>
-      <div>
-        <h2>Camera Feed</h2>
-        {true ? (
-          <>
-            <video
-              ref={videoRef}
-              autoPlay
-              style={{ width: '100%', height: '700px' }}
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+      {/* Camera Section */}
+      <div style={{ width: '70%', height: '70%', position: 'relative', marginBottom: '20px' }}>
+        <h2 className='text-4xl mb-2 font-bold' style={{ color: 'White', textAlign: 'center' }}>Say Cheeeeezzzz!!!</h2>
+        <video
+          ref={videoRef}
+          autoPlay
+          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px',    border: '5px solid white', }}
+        />
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+        {capturedImage && (
+          <div style={{ marginTop: '20px', width: '100%' }}>
+            <h3 style={{ color: 'white', textAlign: 'center' }}>Captured Image</h3>
+            <img
+              src={capturedImage}
+              alt="Captured from camera"
+              style={{ width: '100%', height: 'auto' }}
             />
-            <button 
-  onClick={captureImage} 
-  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
->
-  Capture Photo
-</button>
-
-            {/* <Button color="success" endContent={<CameraIcon/>}>
-        Take a photo
-      </Button>     */}
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
-            {capturedImage && (
-              <div>
-                <h3>Captured Image</h3>
-                <img
-                  src={capturedImage}
-                  alt="Captured from camera"
-                  style={{ width: '100%', height: 'auto' }}
-                />
-              </div>
-            )}
-          </>
-        ) : (
-          <p>Access to camera is not granted or an error occurred.</p>
+          </div>
         )}
       </div>
 
-      <div>
-        <h2>Gallery</h2>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          style={{ display: 'block', margin: '10px 0' }}
-        />
+      {/* Capture Photo Button */}
+      <button
+        onClick={captureImage}
+        className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold  px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
+        style={{ marginBottom: '20px', fontSize: '1.2rem' }}
+      >
+        Capture Photo
+      </button>
+
+      {/* Gallery Section */}
+      <div style={{ width: '100%', textAlign: 'center' }}>
+      <h2 className='font-bold text-4xl text-white drop-shadow-md' style={{ color: 'white', fontSize: '1.7rem', marginBottom: '3px' }}>
+  Upload from Gallery
+</h2>
+
+<div style={{ textAlign: 'center' }}>
+  <input
+    type="file"
+    accept="image/*"
+    ref={fileInputRef}
+    onChange={handleFileChange}
+    id="fileInput"
+    style={{ display: 'none' }} // Hide the default file input
+  />
+  <label
+    htmlFor="fileInput"
+    className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded cursor-pointer"
+    style={{ fontSize: '1.2rem', display: 'inline-block' }}
+  >
+    Gallery
+  </label>
+</div>
+
         {galleryImage && (
           <img
             src={galleryImage}
             alt="Selected from gallery"
-            style={{ width: '100%', height: 'auto' }}
+            style={{ width: '100%', height: 'auto', marginTop: '20px' }}
           />
         )}
       </div>
