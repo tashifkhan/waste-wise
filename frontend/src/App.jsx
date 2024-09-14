@@ -1,10 +1,11 @@
 import Landing from "./pages/Landing"
-
+import CameraPage from "./pages/CameraPage"
 function App() {
 
   return (
  <div>
-<Landing/>
+{/* <Landing/> */}
+<CameraPage/>
  </div>
   )
 }
