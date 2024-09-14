@@ -128,7 +128,7 @@ def img_processing():
 def generate_recycle():
 
     try:
-        name_item=request.json.get('name_item')
+        name=request.json.get('name')
         type = request.json.get('type')
         desc = request.json.get('desc')
 
@@ -149,7 +149,7 @@ def generate_recycle():
             I need you to return me value in form of JSON file and map "recycling_method" as a key to the  array containing (strings) various waste recycling techniques of the previous ,mentioned waste type   and another key as "tips" that contains an array of strings(on specifics of how to recycle that specific type of waste, as mentioned earlier and also detailed description about how to recycle those items to something useful ) and the third key is "diy_solutions" it contains an array of strings (which will return the diy solutions for making useful products using those items)
             We are inputting the waste type and name of the waste item return only the disposal_method and tips ,don't return the waste type and item name as we already have that as input
             Don't include results for different type of waste for example and give output for only the input that you will receive
-            Inputs are name:{name_item} plate, type: {type} & discription: {desc}
+            Inputs are name:{name} plate, type: {type} & discription: {desc}
             Give only the output JSON and no other information whether it be an explanation of the answer and don't forget to add a key of "error" and its value being "none" in the JSON output
             Do describe the the recycling methods in atleast 2-3 lines.
         ''' 
@@ -201,7 +201,7 @@ def generate_recycle():
 @app.route('/generate_disposal', methods=['POST'])
 def generate_disposal():
     try:
-        name_item=request.json.get('name_item')
+        name=request.json.get('name')
         type = request.json.get('type')
         desc = request.json.get('desc')
         prompt = f'''
@@ -221,7 +221,7 @@ def generate_disposal():
             I need you to return me value in form of JSON file and map "disposal_method" as a key to the  array containing (strings) various waste disposal techniques of the previous ,mentioned waste type   and another key as "tips" that contains an array of strings(on specifics of how to dispose that type of waste, as mentioned earlier and also detailed description about how to dispose of those items)
             We are inputting the waste type and name of the waste item return only the disposal_method and tips ,don't return the waste type and item name as we already have that as input
             Don't include results for different type of waste for example and give output for only the input that you will receive
-            Inputs are name:{name_item} plate, type: {type} & discription: {desc}
+            Inputs are name:{name} plate, type: {type} & discription: {desc}
             Give only the output JSON and no other information whether it be an explanation of the  answer and don't forget to add a key of "error" and its value being "none" in the JSON output.
             Do describe the the disposal methods in atleast 2-3 lines.
         ''' 
@@ -372,9 +372,9 @@ async function sendMessage(message) {
 @app.route('/youtube_search', methods=['POST'])
 def youtube_search():
     yt_api_key = os.getenv("YOUTUBE_API_KEY")
-    name_item=request.json.get('name_item')
+    name=request.json.get('name')
 
-    search_query = f"DIY/ Best out of waste/ Recycling {name_item}"
+    search_query = f"DIY/ Best out of waste/ Recycling {name}"
 
     search_url = 'https://www.googleapis.com/youtube/v3/search'
 
