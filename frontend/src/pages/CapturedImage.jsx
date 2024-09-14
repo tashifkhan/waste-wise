@@ -41,6 +41,15 @@ function CapturedImage() {
 			if (res.ok) {
 				const result = await res.json();
 				setProcessingResult(result);
+				// Redirect to the next component with processing result
+				navigate('/Information', {
+          state: {
+            name: result.name,
+            type: result.type,
+            desc: result.desc,
+          },
+        });
+        
 			} else {
 				console.error("Error processing image:", res.statusText);
 				setProcessingResult({ error: "Failed to process image" });
@@ -109,20 +118,10 @@ function CapturedImage() {
 				) : (
 					processingResult && (
 						<div style={{ color: "white", marginTop: "20px" }}>
-							{processingResult.error != "none" ? (
+							{processingResult.error != 'none' ? (
 								<p>Error: {processingResult.error}</p>
 							) : (
-								<div>
-									<p>
-										<strong>Name:</strong> {processingResult.name}
-									</p>
-									<p>
-										<strong>Type:</strong> {processingResult.type}
-									</p>
-									<p>
-										<strong>Description:</strong> {processingResult.desc}
-									</p>
-								</div>
+								<p>Redirecting to the next component...</p>
 							)}
 						</div>
 					)
