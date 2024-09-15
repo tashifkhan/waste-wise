@@ -75,7 +75,15 @@ def img_processing():
                 the 'desc' key gives an accurate and environmentally relevant description of the object 
                 as well as the catagorise the image in the key 'type'. 
                 Categorize the waste (object in the image) into one of the following categories. 
-                household garbage, paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, batteries, and trash
+                    Municipal Solid Waste (MSW), 
+                    Industrial Waste, Agricultural Waste, 
+                    Construction and Demolition (C&D) Waste, Medical Waste, 
+                    Solid Waste, Liquid Waste, 
+                    Gaseous Waste, 
+                    Biodegradable Waste, 
+                    Non-biodegradable Waste, 
+                    Hazardous Waste, 
+                    Non-hazardous Waste
                 Ensure the description and disposal method are accurate and environmentally responsible.
                 ensure that the json is formatted as follows:
                 {
@@ -141,7 +149,7 @@ def generate_recycle():
             analyze waste processing and recycling facilities to help them recover and recycle more waste material.
             The name of our idea is "Waste wise" We are going to make it as a web app
             We will also include a leaderboard and a feed where people can post their images of their recycled products and those recycling the most will be shown on top of our leaderboard
-            We will suggest people on how they can recycle ,we will also help them classify the waste product based of the image that they submit if the item in the image is  paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash.
+            We will suggest people on how they can recycle ,we will also help them classify the waste product based of the image that they submit if the item in the image is Municipal Solid Waste (MSW), Industrial Waste, Agricultural Waste, Construction and Demolition (C&D) Waste, Medical Waste, Solid Waste, Liquid Waste, Gaseous Waste, Biodegradable Waste, Non-biodegradable Waste, Hazardous Waste, Non-hazardous Waste
             We will also suggest on how to dispose as well as recycle the material, we are also going to include ways you could use the item by providing DIY videos from youtube.
             We shall also have chatbot that will support you with anything relate to the environment.
             We will be using image detection api for getting information regarding the images 
@@ -213,7 +221,7 @@ def generate_disposal():
             analyze waste processing and recycling facilities to help them recover and recycle more waste material.
             The name of our idea is "Waste wise" We are going to make it as a web app
             We will also include a leaderboard and a feed where people can post their images of their recycled products and those recycling the most will be shown on top of our leaderboard
-            We will suggest people on how they can recycle ,we will also help them classify the waste product based of the image that they submit if the item in the image is  paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash.
+            We will suggest people on how they can recycle ,we will also help them classify the waste product based of the image that they submit if the item in the image is  Municipal Solid Waste (MSW), Industrial Waste, Agricultural Waste, Construction and Demolition (C&D) Waste, Medical Waste, Solid Waste, Liquid Waste, Gaseous Waste, Biodegradable Waste, Non-biodegradable Waste, Hazardous Waste, Non-hazardous Waste
             We will also suggest on how to dispose as well as recycle the material, we are also going to include ways you could use the item by providing DIY videos from youtube.
             We shall also have chatbot that will support you with anything relate to the environment.
             We will be using image detection api for getting information regarding the images 
