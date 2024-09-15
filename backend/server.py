@@ -151,7 +151,7 @@ def generate_recycle():
             Don't include results for different type of waste for example and give output for only the input that you will receive
             Inputs are name:{name} plate, type: {type} & discription: {desc}
             Give only the output JSON and no other information whether it be an explanation of the answer and don't forget to add a key of "error" and its value being "none" in the JSON output
-            Do describe the the recycling methods in atleast 2-3 lines.
+            In "recycling_menthods" just provie the name of the methods
         ''' 
 
         format_specification = '''
@@ -171,7 +171,7 @@ def generate_recycle():
         )
 
         # Parse the response into a JSON object
-        print(response.text[8:-3])
+        print(response.text)
 
         parsed_response = json.loads(response.text[8:-3])
 
@@ -223,7 +223,7 @@ def generate_disposal():
             Don't include results for different type of waste for example and give output for only the input that you will receive
             Inputs are name:{name} plate, type: {type} & discription: {desc}
             Give only the output JSON and no other information whether it be an explanation of the  answer and don't forget to add a key of "error" and its value being "none" in the JSON output.
-            Do describe the the disposal methods in atleast 2-3 lines.
+            In "desposal_menthods" just provie the name of the methods
         ''' 
 
         format_specification = '''
@@ -242,7 +242,7 @@ def generate_disposal():
                 genai.types.GenerationConfig(temperature=0.1)
         )
 
-        print(response.text[8:-3])
+        print(response.text)
   
         parsed_response = json.loads(response.text[8:-3])
 
@@ -311,6 +311,7 @@ def chat(message):
     # Parse the response to extract JSON-like information
     try:
         parsed_response = json.loads(response.text)
+
     except json.JSONDecodeError:
         raise Exception("Failed to parse model response")
 
