@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { CircularProgress } from '@mui/material'; // Material UI spinner
+import { AiOutlineReload, AiOutlineDelete } from 'react-icons/ai'; // React Icons for Recycle and Dispose
+import { Circles } from 'react-loader-spinner'; // Spinner
+import LandingPageVid2 from '../Videos/LandingPageVid2.mp4';
 
 const Banner = () => {
   const navigate = useNavigate();
@@ -66,41 +68,54 @@ const Banner = () => {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen w-full bg-gradient-to-br from-blue-200 to-blue-600 p-8">
-      {/* Top Section: Waste Information */}
-      <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-        <p className="text-xl font-semibold text-gray-800">WASTE</p>
-        <p className="text-2xl font-bold text-blue-800 mb-2">
-          {name || 'Loading...'}
-        </p>
-        <p className="text-lg font-semibold text-gray-800">TYPE</p>
-        <p className="text-2xl font-bold text-blue-800 mb-6">
-          {type || 'Loading...'}
-        </p>
-      </div>
+    <div className="relative flex flex-col justify-center items-center min-h-screen w-full">
+      {/* Video Background */}
+      <video
+        autoPlay
+        muted
+        loop
+        className="absolute inset-0 w-full h-full object-cover"
+        src={LandingPageVid2} // Make sure to add your video source here
+        type="video/mp4"
+      />
 
-      {/* Button Section */}
-      <div className="flex justify-center space-x-4 mt-6">
-        <button
-          className="bg-green-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-green-700 transition duration-300"
-          onClick={handleRecycle}
-        >
-          RECYCLE
-        </button>
-        <button
-          className="bg-red-600 text-white px-6 py-3 rounded-full shadow-md hover:bg-red-700 transition duration-300"
-        >
-          DISPOSE
-        </button>
-      </div>
-
-      {/* Loading and Error Display */}
-      {loading && (
-        <div className="flex items-center justify-center mt-6">
-          <CircularProgress color="secondary" />
+      {/* Overlay Content */}
+      <div className="relative flex flex-col justify-center items-center w-full min-h-screen bg-black bg-opacity-50 p-8">
+        {/* Top Section: Waste Information */}
+        <div className="bg-white bg-opacity-50 backdrop-blur-lg p-8 rounded-lg shadow-lg text-center w-1/2 h-1/2 flex flex-col justify-center items-center">
+          <p className="text-2xl font-semibold text-gray-800">WASTE</p>
+          <p className="text-4xl font-bold text-blue-800 mb-4">
+            {name || 'Loading...'}
+          </p>
+          <p className="text-2xl font-semibold text-gray-800">TYPE</p>
+          <p className="text-4xl font-bold text-blue-800 mb-6">
+            {type || 'Loading...'}
+          </p>
         </div>
-      )}
-      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+
+        {/* Button Section */}
+        <div className="flex justify-center space-x-4 mt-8">
+          <button
+            className="flex items-center space-x-2 bg-green-600 text-white px-8 py-4 rounded-full shadow-md hover:bg-green-700 transition duration-300"
+            onClick={handleRecycle}
+          >
+            <AiOutlineReload size={24} /> <span className="text-xl">RECYCLE</span>
+          </button>
+          <button
+            className="flex items-center space-x-2 bg-red-600 text-white px-8 py-4 rounded-full shadow-md hover:bg-red-700 transition duration-300"
+          >
+            <AiOutlineDelete size={24} /> <span className="text-xl">DISPOSE</span>
+          </button>
+        </div>
+
+        {/* Loading and Error Display */}
+        {loading && (
+          <div className="flex items-center justify-center mt-6">
+            <Circles color="white" height={80} width={80} />
+          </div>
+        )}
+        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+      </div>
     </div>
   );
 };
