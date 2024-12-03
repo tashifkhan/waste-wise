@@ -71,6 +71,11 @@ function CameraAndGallery() {
 			const imageData = canvasRef.current.toDataURL("image/png");
 			setCapturedImage(imageData);
 
+			// Stop the camera stream
+			const stream = videoRef.current.srcObject;
+			const tracks = stream.getTracks();
+			tracks.forEach((track) => track.stop());
+
 			// Redirect to image display page with captured image
 			navigate("/display-image", { state: { capturedImage: imageData } });
 		} else {
