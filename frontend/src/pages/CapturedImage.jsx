@@ -10,7 +10,11 @@ function CapturedImage() {
 	const [loading, setLoading] = useState(false);
 
 	if (!capturedImage) {
-		return <h2>No image captured. Go back to the camera.</h2>;
+		return (
+			<h2 className="text-center text-2xl mt-10">
+				No image captured. Go back to the camera.
+			</h2>
+		);
 	}
 
 	const handleConfirmClick = async () => {
@@ -36,20 +40,17 @@ function CapturedImage() {
 			});
 
 			console.log("Response status:", res.status);
-			// console.log('Response text:', await res.text());
 
 			if (res.ok) {
 				const result = await res.json();
 				setProcessingResult(result);
-				// Redirect to the next component with processing result
-				navigate('/Information', {
-          state: {
-            name: result.name,
-            type: result.type,
-            desc: result.desc,
-          },
-        });
-        
+				navigate("/Information", {
+					state: {
+						name: result.name,
+						type: result.type,
+						desc: result.desc,
+					},
+				});
 			} else {
 				console.error("Error processing image:", res.statusText);
 				setProcessingResult({ error: "Failed to process image" });
@@ -63,62 +64,32 @@ function CapturedImage() {
 	};
 
 	return (
-		<div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
+		<div className="relative h-screen overflow-hidden">
 			<video
 				autoPlay
 				loop
 				muted
-				style={{
-					position: "absolute",
-					top: 0,
-					left: 0,
-					width: "100%",
-					height: "100%",
-					objectFit: "cover",
-					zIndex: -1,
-				}}
+				className="absolute top-0 left-0 w-full h-full object-cover z-[-1]"
 			>
 				<source src={BGVideo} type="video/mp4" />
 				Your browser does not support the video tag.
 			</video>
 
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					justifyContent: "center",
-					height: "100%",
-				}}
-			>
-				<h1
-					className="text-3xl font-bold mb-4"
-					style={{
-						color: "white",
-						textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)",
-					}}
-				>
+			<div className="flex flex-col items-center justify-center h-full">
+				<h1 className="text-3xl font-bold mb-4 text-white text-shadow-lg">
 					Captured Image
 				</h1>
 				<img
 					src={capturedImage}
 					alt="Captured"
-					style={{
-						width: "45%",
-						height: "70%",
-						borderRadius: "10px",
-						border: "10px solid white",
-						boxShadow: "0 4px 15px rgba(0, 0, 0, 0.3)",
-					}}
+					className="w-11/12 md:w-2/3 lg:w-1/2 h-auto rounded-lg border-4 border-white shadow-lg"
 				/>
 				{loading ? (
-					<p style={{ color: "white", marginTop: "20px" }}>
-						Processing image...
-					</p>
+					<p className="text-white mt-5">Processing image...</p>
 				) : (
 					processingResult && (
-						<div style={{ color: "white", marginTop: "20px" }}>
-							{processingResult.error != 'none' ? (
+						<div className="text-white mt-5">
+							{processingResult.error ? (
 								<p>Error: {processingResult.error}</p>
 							) : (
 								<p>Redirecting to the next component...</p>
@@ -128,15 +99,13 @@ function CapturedImage() {
 				)}
 				<button
 					onClick={handleConfirmClick}
-					className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
-					style={{ fontSize: "1.2rem", marginTop: "20px" }}
+					className="bg-green-500 mt-5 hover:bg-green-600 text-white font-bold px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md text-lg"
 				>
 					Confirm
 				</button>
 				<button
 					onClick={() => navigate("/CameraPage")}
-					className="bg-green-500 mt-9 hover:bg-green-600 text-white font-bold px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md"
-					style={{ fontSize: "1.2rem", marginTop: "20px" }}
+					className="bg-green-500 mt-5 hover:bg-green-600 text-white font-bold px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-green-300 shadow-md text-lg"
 				>
 					Go Back to Camera
 				</button>
