@@ -135,8 +135,30 @@ def img_processing():
                 config=genai.types.GenerateContentConfig(temperature=0.1),
             )
 
-            parsed_response = json.loads(response.text[8:-3])
-            print(response.text[8:-3])
+            # Extract JSON from the response text
+            response_text = response.text.strip()
+            print("Raw response:", response_text)
+
+            # Find the JSON content between ```json and ``` markers
+            if "```json" in response_text:
+                start_marker = "```json"
+                end_marker = "```"
+                start_index = response_text.find(start_marker) + len(start_marker)
+                end_index = response_text.find(end_marker, start_index)
+                json_content = response_text[start_index:end_index].strip()
+            elif response_text.startswith("{") and response_text.endswith("}"):
+                # If the response is already clean JSON
+                json_content = response_text
+            else:
+                # Try to find JSON content within the response
+                start_brace = response_text.find("{")
+                end_brace = response_text.rfind("}")
+                if start_brace != -1 and end_brace != -1:
+                    json_content = response_text[start_brace : end_brace + 1]
+                else:
+                    raise ValueError("Could not extract JSON from response")
+
+            parsed_response = json.loads(json_content)
 
             formatted_response = {
                 "name": parsed_response.get("name"),
@@ -228,19 +250,39 @@ def generate_recycle():
         # Parse the response into a JSON object
         print(response.text)
 
-        parsed_response = json.loads(response.text[8:-3])
+        # Extract JSON from the response text
+        response_text = response.text.strip()
 
-        return jsonify(parsed_response)
+        # Find the JSON content between ```json and ``` markers
+        if "```json" in response_text:
+            start_marker = "```json"
+            end_marker = "```"
+            start_index = response_text.find(start_marker) + len(start_marker)
+            end_index = response_text.find(end_marker, start_index)
+            json_content = response_text[start_index:end_index].strip()
+        elif response_text.startswith("{") and response_text.endswith("}"):
+            # If the response is already clean JSON
+            json_content = response_text
+        else:
+            # Try to find JSON content within the response
+            start_brace = response_text.find("{")
+            end_brace = response_text.rfind("}")
+            if start_brace != -1 and end_brace != -1:
+                json_content = response_text[start_brace : end_brace + 1]
+            else:
+                raise ValueError("Could not extract JSON from response")
 
-        # # Format the response as desired
-        # formatted_response = {
-        #     "recycling_method": parsed_response["recycling_method"],
-        #     "tips": parsed_response["tips"],
-        #     "diy_solutions": parsed_response["diy_solutions"],
-        #     "error": "none"
-        # }
+        parsed_response = json.loads(json_content)
 
-        # return jsonify(formatted_response)
+        # Ensure the response has the required structure
+        formatted_response = {
+            "recycling_method": parsed_response.get("recycling_method", []),
+            "tips": parsed_response.get("tips", []),
+            "diy_solutions": parsed_response.get("diy_solutions", []),
+            "error": "none",
+        }
+
+        return jsonify(formatted_response)
 
     except Exception as e:
         return (
@@ -262,7 +304,6 @@ def generate_disposal():
         name = request.json.get("name")
         type = request.json.get("type")
         desc = request.json.get("desc")
-        instructions = "hello"
         prompt = f"""
             We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
             Problem: Improper waste management is contributing to pollution and environmental degradation.
@@ -308,17 +349,38 @@ def generate_disposal():
 
         print(response.text)
 
-        parsed_response = json.loads(response.text[8:-3])
+        # Extract JSON from the response text
+        response_text = response.text.strip()
 
-        return jsonify(parsed_response)
+        # Find the JSON content between ```json and ``` markers
+        if "```json" in response_text:
+            start_marker = "```json"
+            end_marker = "```"
+            start_index = response_text.find(start_marker) + len(start_marker)
+            end_index = response_text.find(end_marker, start_index)
+            json_content = response_text[start_index:end_index].strip()
+        elif response_text.startswith("{") and response_text.endswith("}"):
+            # If the response is already clean JSON
+            json_content = response_text
+        else:
+            # Try to find JSON content within the response
+            start_brace = response_text.find("{")
+            end_brace = response_text.rfind("}")
+            if start_brace != -1 and end_brace != -1:
+                json_content = response_text[start_brace : end_brace + 1]
+            else:
+                raise ValueError("Could not extract JSON from response")
 
-        # formatted_response = {
-        #     "disposal_method": parsed_response["disposal_method"],
-        #     "tips": parsed_response["tips"],
-        #     "error": "none"
-        # }
+        parsed_response = json.loads(json_content)
 
-        # return jsonify(formatted_response)
+        # Ensure the response has the required structure
+        formatted_response = {
+            "disposal_method": parsed_response.get("disposal_method", []),
+            "tips": parsed_response.get("tips", []),
+            "error": "none",
+        }
+
+        return jsonify(formatted_response)
 
     except Exception as e:
         return (
