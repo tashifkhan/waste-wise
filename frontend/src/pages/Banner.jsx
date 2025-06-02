@@ -13,6 +13,7 @@ const Banner = () => {
 	const { name, type, desc } = location.state || {};
 
 	const [recycleData, setRecycleData] = useState(null);
+	const [disposalData, setDisposalData] = useState(null);
 	const [youtubeVideos, setYoutubeVideos] = useState([]);
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ const Banner = () => {
 			const recycleResponse = await axios.post(
 				"http://localhost:5000/generate_recycle",
 				{
-					name_item: name,
+					name: name,
 					type: type,
 					desc: desc || "No description provided",
 				}
@@ -76,6 +77,42 @@ const Banner = () => {
 		}
 	};
 
+	const handleDispose = async () => {
+		setLoading(true); // Start loading state
+
+		try {
+			// API Call: Generate Disposal Methods
+			const disposalResponse = await axios.post(
+				"http://localhost:5000/generate_disposal",
+				{
+					name: name,
+					type: type,
+					desc: desc || "No description provided",
+				}
+			);
+
+			setDisposalData(disposalResponse.data); // Set disposal data
+			setError(disposalResponse.data.error || ""); // Handle any errors from the response
+
+			// If API succeeds, navigate to the /disposal page with the data
+			if (disposalResponse.data.error === "none") {
+				navigate("/disposal", {
+					state: {
+						disposalMethods: disposalResponse.data.disposal_method,
+						tips: disposalResponse.data.tips,
+						wasteName: name,
+						wasteType: type,
+					},
+				});
+			}
+		} catch (error) {
+			console.error(error);
+			setError("Failed to process disposal methods."); // Handle request errors
+		} finally {
+			setLoading(false); // End loading state
+		}
+	};
+
 	return (
 		<div className="relative flex flex-col justify-center items-center min-h-screen w-full">
 			{/* Video Background */}
@@ -115,7 +152,10 @@ const Banner = () => {
 						<AiOutlineReload size={24} />{" "}
 						<span className="text-lg md:text-xl">RECYCLE</span>
 					</button>
-					<button className="flex items-center space-x-2 bg-red-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-full shadow-md hover:bg-red-700 transition duration-300">
+					<button
+						className="flex items-center space-x-2 bg-red-600 text-white px-6 md:px-8 py-3 md:py-4 rounded-full shadow-md hover:bg-red-700 transition duration-300"
+						onClick={handleDispose}
+					>
 						<AiOutlineDelete size={24} />{" "}
 						<span className="text-lg md:text-xl">DISPOSE</span>
 					</button>
