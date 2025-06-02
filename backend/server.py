@@ -18,6 +18,33 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
+system_prompt_chat = """
+    We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
+    Problem: Improper waste management is contributing to pollution and environmental degradation.
+    Solution: An AI-powered waste management tool that educates users on how to reduce waste, and provides real-time suggestions for proper disposal or recycling based on location. It could also predict the environmental impact of consumption patterns and suggest alternatives 
+    Impact: This could create immediate environmental and social impact by reducing waste generation and promoting a circular economy in communities.
+    Using AI to recycle more waste
+    analyze waste processing and recycling facilities to help them recover and recycle more waste material.
+    The name of our idea is "Waste wise" We are going to make it as a web app
+    We will also include a leaderboard and a feed where people can post their images of their recycled products and those recycling the most will be shown on top of our leaderboard
+    We will suggest people on how they can recycle ,we will also help them classify the waste product based of the image that they submit if the item in the image is  paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash.
+    We will also suggest on how to dispose as well as recycle the material, we are also going to include ways you could use the item by providing DIY videos from youtube.
+    We shall also have chatbot that will support you with anything relate to the environment.
+    We will be using image detection api for getting information regarding the images 
+    we will use api  to input the waste products that have been detected using the previous api to get information about what type/classification of waste it is and how to dispose of it also tell ways to recycle the item as well as reuse it we are also using an youtube api to get links of diy videos regarding reusing the items and how to make sure we us the item to make diy products.
+
+    You are a Green Panther. Always provide accurate and environmentally responsible information.
+"""
+
+chat_client = client.chats.create(
+    model="gemini-2.5-flash-preview-05-20",
+    config=genai.types.GenerateContentConfig(
+        system_instruction=system_prompt_chat,
+        temperature=0.7,
+    ),
+)
+
+
 @app.route("/img_processing", methods=["POST"])
 def img_processing():
     UPLOAD_FOLDER = "backend/uploads"
@@ -307,38 +334,13 @@ def generate_disposal():
 
 # chatbot
 def chat(message):
-    # Chat history setup
-
-    system_prompt = """
-        We are a team of students working for a hackathon, the topic of the hackathon is AI-Driven Waste Management and Recycling Advisor
-        Problem: Improper waste management is contributing to pollution and environmental degradation.
-        Solution: An AI-powered waste management tool that educates users on how to reduce waste, and provides real-time suggestions for proper disposal or recycling based on location. It could also predict the environmental impact of consumption patterns and suggest alternatives 
-        Impact: This could create immediate environmental and social impact by reducing waste generation and promoting a circular economy in communities.
-        Using AI to recycle more waste
-        analyze waste processing and recycling facilities to help them recover and recycle more waste material.
-        The name of our idea is "Waste wise" We are going to make it as a web app
-        We will also include a leaderboard and a feed where people can post their images of their recycled products and those recycling the most will be shown on top of our leaderboard
-        We will suggest people on how they can recycle ,we will also help them classify the waste product based of the image that they submit if the item in the image is  paper, cardboard, biological, metal, plastic, green-glass, brown-glass, white-glass, clothes, shoes, batteries, and trash.
-        We will also suggest on how to dispose as well as recycle the material, we are also going to include ways you could use the item by providing DIY videos from youtube.
-        We shall also have chatbot that will support you with anything relate to the environment.
-        We will be using image detection api for getting information regarding the images 
-        we will use api  to input the waste products that have been detected using the previous api to get information about what type/classification of waste it is and how to dispose of it also tell ways to recycle the item as well as reuse it we are also using an youtube api to get links of diy videos regarding reusing the items and how to make sure we us the item to make diy products.
-
-        You are a Green Panther. Always provide accurate and environmentally responsible information.
-    """
-
-    chat = client.chats.create(
-        model="gemini-2.0-flash",
-        config=genai.types.GenerateContentConfig(
-            system_instruction=system_prompt,
-            temperature=0.7,
-        ),
-    )
-
     # Send the message and get the response
-    response = chat.send_message(message)
-    print(response.text)
-    print(chat.get_history())
+    response = chat_client.send_message(message)
+    # print(response.text)
+    print("\n\nResponse received")
+    for message in chat_client.get_history():
+        print(f"role - {message.role}", end=": ")
+        print(message.parts[0].text)
 
     # Parse the response to extract JSON-like information
     # try:
@@ -365,7 +367,7 @@ def chat(message):
 
 @app.route("/chat", methods=["POST"])
 def chat_endpoint():
-    message = request.form.get("message")
+    message = request.json.get("message")
 
     # Check if the message is missing or empty
     if not message:
@@ -379,9 +381,6 @@ def chat_endpoint():
         return (
             jsonify(
                 {
-                    "recycling_method": ["e-1"],
-                    "tips": ["e-1"],
-                    "diy_solutions": ["e-1"],
                     "error": str(e),
                 }
             ),
@@ -408,7 +407,7 @@ def youtube_search():
     yt_api_key = os.getenv("YOUTUBE_API_KEY")
     name = request.json.get("name")
 
-    search_query = f"DIY/ Best out of waste/ Recycling {name}"
+    search_query = f"DIY / Best out of waste / Recycling {name}"
 
     search_url = "https://www.googleapis.com/youtube/v3/search"
 
