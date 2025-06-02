@@ -39,13 +39,19 @@ const Banner = () => {
 			);
 
 			setRecycleData(recycleResponse.data); // Set recycling data
-			setError(recycleResponse.data.error || ""); // Handle any errors from the response
+
+			// Only set error if it's not "none"
+			if (recycleResponse.data.error && recycleResponse.data.error !== "none") {
+				setError(recycleResponse.data.error);
+			} else {
+				setError(""); // Clear any previous errors
+			}
 
 			// Second API Call: Fetch YouTube videos
 			const youtubeResponse = await axios.post(
 				"http://localhost:5000/youtube_search",
 				{
-					name_item: name, // Use waste name to search for DIY videos
+					name: name, // Use waste name to search for DIY videos
 				}
 			);
 
@@ -57,7 +63,7 @@ const Banner = () => {
 
 			// If both APIs succeed, navigate to the /recycle page with all the data
 			if (
-				!recycleResponse.data.error &&
+				recycleResponse.data.error === "none" &&
 				youtubeResponse.data.error === "none"
 			) {
 				navigate("/recycle", {
@@ -68,6 +74,8 @@ const Banner = () => {
 						youtubeVideos: youtubeResponse.data.video_links, // Pass YouTube videos to the new page
 					},
 				});
+			} else {
+				setError("Failed to load recycling data or YouTube videos.");
 			}
 		} catch (error) {
 			console.error(error);
@@ -92,7 +100,16 @@ const Banner = () => {
 			);
 
 			setDisposalData(disposalResponse.data); // Set disposal data
-			setError(disposalResponse.data.error || ""); // Handle any errors from the response
+
+			// Only set error if it's not "none"
+			if (
+				disposalResponse.data.error &&
+				disposalResponse.data.error !== "none"
+			) {
+				setError(disposalResponse.data.error);
+			} else {
+				setError(""); // Clear any previous errors
+			}
 
 			// If API succeeds, navigate to the /disposal page with the data
 			if (disposalResponse.data.error === "none") {
