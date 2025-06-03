@@ -96,6 +96,8 @@ async def process_image(file: UploadFile = File(...)) -> ImageResponse:
             contents=[img, prompt],
             config=genai.types.GenerateContentConfig(
                 temperature=0.1,
+                response_mime_type="application/json",
+                response_schema=ImageResponse,
             ),
         )
 

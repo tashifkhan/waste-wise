@@ -59,11 +59,6 @@ async def generate_recycle(req: GenerateRecycleRequest) -> GenerateRecycleRespon
             status_code=400,
             detail="Name, type, and description must not exceed length limits.",
         )
-    if not all(char.isalnum() or char.isspace() for char in name + type + desc):
-        raise HTTPException(
-            status_code=400,
-            detail="Name, type, and description must contain only alphanumeric characters and spaces.",
-        )
     if len(name) == 0 or len(type) == 0 or len(desc) == 0:
         raise HTTPException(
             status_code=400,
@@ -93,11 +88,6 @@ async def generate_recycle(req: GenerateRecycleRequest) -> GenerateRecycleRespon
         raise HTTPException(
             status_code=400,
             detail="Name, type, and description must contain only printable characters.",
-        )
-    if not name.isidentifier() or not type.isidentifier():
-        raise HTTPException(
-            status_code=400,
-            detail="Name and type must be valid Python identifiers.",
         )
 
     prompt = f"""
@@ -137,7 +127,11 @@ async def generate_recycle(req: GenerateRecycleRequest) -> GenerateRecycleRespon
         response = client.models.generate_content(
             model="gemini-2.0-flash",
             contents=[prompt],
-            config=genai.types.GenerateContentConfig(temperature=0.1),
+            config=genai.types.GenerateContentConfig(
+                temperature=0.1,
+                response_mime_type="application/json",
+                response_schema=GenerateRecycleResponse,
+            ),
         )
 
         raw = response.text
