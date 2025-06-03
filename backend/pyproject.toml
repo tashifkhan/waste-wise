@@ -5,10 +5,12 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "flask>=3.1.1",
-    "flask-cors>=6.0.0",
+    "fastapi>=0.95.0",
+    "uvicorn[standard]>=0.22.0",
     "google-genai>=1.18.0",
     "pillow>=11.2.1",
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
+    "pydantic>=2.5.1",
+    "python-multipart>=0.0.20",
 ]

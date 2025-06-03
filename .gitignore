@@ -26,3 +26,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Temporary files
+*.tmp
+
+# Build directories
+build
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Dependency directories
+jspm_packagees
+
