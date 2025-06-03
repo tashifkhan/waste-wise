@@ -53,11 +53,6 @@ async def generate_disposal(req: GenerateDisposalRequest) -> GenerateDisposalRes
             status_code=400,
             detail="Name, type, and description must not exceed length limits.",
         )
-    if not all(char.isalnum() or char.isspace() for char in name + type + desc):
-        raise HTTPException(
-            status_code=400,
-            detail="Name, type, and description must contain only alphanumeric characters and spaces.",
-        )
     if len(name) == 0 or len(type) == 0 or len(desc) == 0:
         raise HTTPException(
             status_code=400,
@@ -87,11 +82,6 @@ async def generate_disposal(req: GenerateDisposalRequest) -> GenerateDisposalRes
         raise HTTPException(
             status_code=400,
             detail="Name, type, and description must contain only printable characters.",
-        )
-    if not name.isidentifier() or not type.isidentifier():
-        raise HTTPException(
-            status_code=400,
-            detail="Name and type must be valid Python identifiers.",
         )
 
     prompt = f"""
@@ -135,6 +125,8 @@ async def generate_disposal(req: GenerateDisposalRequest) -> GenerateDisposalRes
                     You are a Green Panther. Your task is to provide accurate and environmentally responsible waste disposal methods and tips based on the input waste type and name.
                 """,
                 temperature=0.1,
+                response_mime_type="application/json",
+                response_schema=GenerateDisposalResponse,
             ),
         )
 
